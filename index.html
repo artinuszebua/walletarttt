@@ -11,6 +11,7 @@
             --primary: #4CAF50;
             --danger: #f44336;
             --sync: #f39c12;
+            --load: #3498db;
             --text: #333;
         }
         body {
@@ -81,7 +82,8 @@
         button:hover { opacity: 0.8; }
         button:disabled { background-color: #ccc; cursor: not-allowed; }
         .btn-add { background-color: var(--primary); }
-        .btn-sync { background-color: var(--sync); margin-left: auto; }
+        .btn-load { background-color: var(--load); margin-left: auto; }
+        .btn-sync { background-color: var(--sync); }
         .btn-export { background-color: #2c3e50; }
 
         /* Table Section */
@@ -132,6 +134,7 @@
         </select>
         <button class="btn-add" onclick="addTransaction()">Add Data</button>
         
+        <button class="btn-load" id="load-btn" onclick="loadFromDrive()">Load from Drive</button>
         <button class="btn-sync" id="sync-btn" onclick="syncToDrive()">Sync to Drive</button>
         <button class="btn-export" onclick="exportToCSV()">Download Local</button>
     </div>
@@ -210,6 +213,37 @@
         updateUI();
     }
 
+    async function loadFromDrive() {
+        if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL === '') {
+            alert("Please paste your Google Script URL into the HTML code first!");
+            return;
+        }
+
+        const loadBtn = document.getElementById('load-btn');
+        loadBtn.textContent = "Loading...";
+        loadBtn.disabled = true;
+
+        try {
+            const response = await fetch(GOOGLE_SCRIPT_URL); 
+            const cloudData = await response.json();
+            
+            if (Array.isArray(cloudData) && cloudData.length > 0) {
+                transactions = cloudData;
+                localStorage.setItem('transactions', JSON.stringify(transactions));
+                updateUI();
+                alert("Success! Data loaded from Google Drive.");
+            } else {
+                alert("No data found in Google Drive yet.");
+            }
+        } catch (error) {
+            alert("Network error. Could not load from Google Drive.");
+            console.error(error);
+        } finally {
+            loadBtn.textContent = "Load from Drive";
+            loadBtn.disabled = false;
+        }
+    }
+
     async function syncToDrive() {
         if (transactions.length === 0) {
             alert("No data available to sync.");
@@ -235,7 +269,7 @@
             const result = await response.json();
             
             if (result.status === 'success') {
-                alert("Success! CSV file updated in your Google Drive.");
+                alert("Success! CSV and JSON files updated in your Google Drive.");
             } else {
                 alert("Error saving to Drive: " + result.message);
             }
