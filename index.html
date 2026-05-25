@@ -150,7 +150,6 @@
 </div>
 
 <script>
-    // PASTE YOUR GOOGLE SCRIPT URL HERE INSIDE THE QUOTES
     const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzgWQL_OoGLaU8KHceJWvxiohGAgT5ihS69_WBhWN1d9LEqt9ABWv5HedIDwvIw-dFzuA/exec';
 
     let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
@@ -211,13 +210,13 @@
         updateUI();
     }
 
-    // THE NEW DRIVE SYNC FUNCTION
     async function syncToDrive() {
         if (transactions.length === 0) {
             alert("No data available to sync.");
             return;
         }
-        if (GOOGLE_SCRIPT_URL === 'https://script.google.com/d/1fqSEzYITB0FtJgQNjP8zahInfCQ3luHafRH-EGYg57OL5h-U9FtboEvZ/edit?usp=sharing') {
+        
+        if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL === '') {
             alert("Please paste your Google Script URL into the HTML code first!");
             return;
         }
@@ -227,7 +226,6 @@
         syncBtn.disabled = true;
 
         try {
-            // We use text/plain to avoid complex CORS security blocks in the browser
             const response = await fetch(GOOGLE_SCRIPT_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -250,7 +248,6 @@
         }
     }
 
-    // Keep the old manual download feature
     function exportToCSV() {
         if (transactions.length === 0) return alert("No data to export.");
         let csvContent = "Date,Description,Type,Amount\n";
